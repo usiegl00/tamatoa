@@ -1,5 +1,5 @@
 # Copyright waiver for tamatoa
-Files: CONTRIBUTING.txt Makefile README.txt shellcheck.c tamatoa.rb UNLICENSE WAIVER
+Files: CODEOWNERS CONTRIBUTING.txt Makefile README.txt shellcheck.c tamatoa.rb UNLICENSE WAIVER
 
 I dedicate any and all copyright interest in this software to the
 public domain. I make this dedication for the benefit of the public at
