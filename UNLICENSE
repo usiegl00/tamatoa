@@ -1,4 +1,4 @@
-Files: CONTRIBUTING.txt Makefile README.txt shellcheck.c tamatoa.rb WAIVER
+Files: CODEOWNERS CONTRIBUTING.txt Makefile README.txt shellcheck.c tamatoa.rb WAIVER
 License: Unlicense
 This is free and unencumbered software released into the public domain.
 
