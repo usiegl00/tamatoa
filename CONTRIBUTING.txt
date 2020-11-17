@@ -1,0 +1,28 @@
+Contributing to tamatoa
+=======================
+
+Opening issues:
+
+Please provide a clear and concise description of your question so that we can
+help you as best as possible.
+
+If you found a bug, please label the issue with "bug" so that we can assess its priority.
+
+Commiting to the project:
+
+Contributors sign the WAIVER to dedicate their copyright interest to the public domain.
+
+git commit -S -a -m "Commit Message" -m "$(gpg --no-version --armor -o - --sign WAIVER)"
+
+Opening a pull request:
+
+All pull requests are linked to an issue.
+Merging the pr will close the issue.
+Eg: Fixes #0: Cleanup Example
+
+If there is no issue for a pull request, please create one.
+
+All discussion about how to solve the issue is done in the issue.
+All discussion about how to implement the solution is done in the pr.
+
+When you add files please update the WAIVER and UNLICENSE to reflect those changes.
