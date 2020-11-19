@@ -50,7 +50,7 @@ _main:
   callq _finddyld
   cmpq $0x0, %rsi
   je _exit
-  movq $0x3f60, %rdx
+  movq $0xMACHOENTRY, %rdx
   addq %rdx, %rsi
   callq *%rsi
 	jmp _exit
