@@ -27,7 +27,7 @@ stager.each_slice(4) do |s|
   s = s.pack("C*").reverse.unpack("H*")[0]
   #STDERR.puts s.inspect
   #STDERR.puts([s.to_i(16)].pack("L"))
-  assembly << "  movl $0x#{s}, (%r11)\n" unless s == "0"
+  assembly << "  movl $0x#{s}, (%r11)\n" unless s == "00000000"
   assembly << "  addq $0x4, %r11\n"
 end
 macho = File.read(ARGV[1]).bytes
@@ -45,7 +45,7 @@ assembly << PAYLOAD_HEADER
 macho.each_slice(4) do |s|
   s.compact!
   s = s.pack("C*").reverse.unpack("H*")[0]
-  assembly << "  movl $0x#{s}, (%r11)\n" unless s == "0"
+  assembly << "  movl $0x#{s}, (%r11)\n" unless s == "00000000"
   assembly << "  addq $0x4, %r11\n"
 end
 ASSEMBLY_FOOTER=<<EOF
@@ -56,7 +56,7 @@ ASSEMBLY_FOOTER=<<EOF
   movq $0, %rax
   pushq %rax
 
-  movq $13760, %rax
+  movq $15527, %rax
   add %rax, %r14
 
   callq *%r14
