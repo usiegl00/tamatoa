@@ -19,6 +19,7 @@ BYTE_HEADER=<<EOF
   movq %r14, %r11
 EOF
 assembly << BYTE_HEADER
+len = 0
 stager.each_slice(4) do |s|
   s.compact!
   #STDERR.puts s.inspect
@@ -27,8 +28,12 @@ stager.each_slice(4) do |s|
   s = s.pack("C*").reverse.unpack("H*")[0]
   #STDERR.puts s.inspect
   #STDERR.puts([s.to_i(16)].pack("L"))
-  assembly << "  movl $0x#{s}, (%r11)\n" unless s == "00000000"
-  assembly << "  addq $0x4, %r11\n"
+  unless s == "00000000"
+    assembly << "  addq $0x#{len.to_s(16)}, %r11\n" unless len == 0
+    assembly << "  movl $0x#{s}, (%r11)\n"
+    len = 0
+  end
+  len += 4
 end
 macho = File.read(ARGV[1]).bytes
 PAYLOAD_HEADER=<<EOF
@@ -42,11 +47,16 @@ PAYLOAD_HEADER=<<EOF
   movq %r10, %r11
 EOF
 assembly << PAYLOAD_HEADER
+len = 0
 macho.each_slice(4) do |s|
   s.compact!
   s = s.pack("C*").reverse.unpack("H*")[0]
-  assembly << "  movl $0x#{s}, (%r11)\n" unless s == "00000000"
-  assembly << "  addq $0x4, %r11\n"
+  unless s == "00000000"
+    assembly << "  addq $0x#{len.to_s(16)}, %r11\n" unless len == 0
+    assembly << "  movl $0x#{s}, (%r11)\n"
+    len = 0
+  end
+  len += 4
 end
 ASSEMBLY_FOOTER=<<EOF
   andq $-0x10, %rsp
