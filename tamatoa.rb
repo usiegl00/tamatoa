@@ -65,7 +65,7 @@ ASSEMBLY_FOOTER=<<EOF
   pushq %rax
 
   movq $15527, %rax
-  add %rax, %r14
+  addq %rax, %r14
 
   callq *%r14
 
