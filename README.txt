@@ -13,7 +13,7 @@
                        \\  '  ^^^  '  //                        
   +----------------------------------------------------------+  
   |    Assembles 64-bit MachOs into x86_64 PIE Shellcode.    |  
-  |      Tamatoa is a MachO Crab with a golden shell.        |  
+  |                 Tamatoa is a MachO Crab.                 |  
   +----------------------------------------------------------+  
                             \\   //                             
                              \\_//                              
