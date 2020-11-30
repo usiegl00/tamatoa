@@ -57,15 +57,9 @@ macho.each_slice(4) do |s|
   len += 4
 end
 ASSEMBLY_FOOTER=<<EOF
-  andq $-0x10, %rsp
   pushq $0
-  pushq $0
-  pushq $0
-  movq $0, %rax
-  pushq %rax
 
-  movq $15527, %rax
-  addq %rax, %r14
+  addq $15527, %r14
 
   callq *%r14
 
