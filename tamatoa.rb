@@ -23,10 +23,8 @@ len = 0
 stager.each_slice(4) do |s|
   s.compact!
   #STDERR.puts s.inspect
-  #STDERR.puts s.pack("C*")
   #STDERR.puts s.pack("C*").inspect#.unpack("L")[0].inspect
   s = s.pack("C*").reverse.unpack("H*")[0]
-  #STDERR.puts s.inspect
   #STDERR.puts([s.to_i(16)].pack("L"))
   unless s == "00000000"
     assembly << "  addq $0x#{len.to_s(16)}, %r11\n" unless len == 0
