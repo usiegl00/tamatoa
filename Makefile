@@ -12,7 +12,7 @@ shellcheck: shellcheck.c
 
 #.SILENT: macho
 macho:
-	printf '#include <stdio.h>\nint main() {printf("Hello, %%s.\\n", "tamatoa");}' | clang -O3 -x c -o $@ -
+	printf "#include <stdio.h>\nint main() {printf(\"Hello, %%s.\\\\n\", \"tamatoa\");}" | clang -O3 -x c -o $@ -
 #printf "\033[0;31m[-]\033[0m Error: file not found: $@\n"
 #false
 
