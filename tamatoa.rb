@@ -7,7 +7,7 @@ _main:
 EOF
 assembly << ASSEMBLY_HEADER
 stager = File.read(ARGV[0]).bytes
-BYTE_HEADER=<<EOF
+STAGE_HEADER=<<EOF
   xorq %r8, %r8
   xorq %r9, %r9
   movq $0x#{stager.size.to_s(16)}, %rsi
@@ -18,7 +18,7 @@ BYTE_HEADER=<<EOF
   movq %rax, %r14
   movq %r14, %r11
 EOF
-assembly << BYTE_HEADER
+assembly << STAGE_HEADER
 len = 0
 stager.each_slice(4) do |s|
   s.compact!
@@ -34,9 +34,9 @@ stager.each_slice(4) do |s|
   len += 4
 end
 macho = File.read(ARGV[1]).bytes
-PAYLOAD_HEADER=<<EOF
+MACH_HEADER=<<EOF
   movq $0x#{macho.size.to_s(16)}, %r12
-  movq $#{macho.size}, %rsi
+  movq $0x#{macho.size.to_s(16)}, %rsi
   movq $7, %rdx
   movq $0x1002, %r10
   movl $0x20000c5, %eax
@@ -44,7 +44,7 @@ PAYLOAD_HEADER=<<EOF
   movq %rax, %r10
   movq %r10, %r11
 EOF
-assembly << PAYLOAD_HEADER
+assembly << MACH_HEADER
 len = 0
 macho.each_slice(4) do |s|
   s.compact!
