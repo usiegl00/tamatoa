@@ -22,6 +22,7 @@ else
 	sed s/MACHOENTRY/$(shell ruby -rmacho -e 'print (MachO::MachOFile.new("macho").load_commands.select {|l|l.class == MachO::LoadCommands::EntryPointCommand}[0].entryoff.to_s(16))')/g $< > macho.s
 	clang -O3 -o $@ macho.s
 	strip $@
+	strip -A $@
 endif
 
 tamatoa.bin: tamatoa shellcheck
