@@ -3,7 +3,7 @@
 _main:
   pushq %rbp
   movq %rsp, %rbp
-  subq $0x70, %rsp
+  subq $0x50, %rsp
   movq %r15, 0x10(%rsp)
   movq %r12, 0x18(%rsp)
   xorq %rcx, %rcx
@@ -54,7 +54,7 @@ _main:
   callq *%rsi
 
 _exit:
-  addq $0x70, %rsp
+  addq $0x50, %rsp
   popq %rbp
 
   retq
@@ -81,7 +81,7 @@ _fdloop0:
 _fdcheck:
   movq %rbx, %rdi
 _fddref:
-  movq $0777, %r12
+  movq $0x1ff, %rsi
   movq $0x200000F, %rax
   syscall
   xorq %rsi, %rsi
@@ -105,7 +105,7 @@ _fdexit:
 _resolvesymbol:
   pushq %rbp
   movq %rsp, %rbp
-  subq $0x70, %rsp
+  subq $0x50, %rsp
   movq %rdi, 0x28(%rsp)
   movq %rdx, 0x30(%rsp)
   movq %rsi, 0x38(%rsp)
@@ -143,7 +143,7 @@ _rscont1:
   cmpq $0x0, %r12
   jne _getvaddr
   movq $-0x1, %rax
-  addq $0x70, %rsp
+  addq $0x50, %rsp
   popq %rbp
   retq
 
@@ -194,7 +194,7 @@ _gvloop:
   movq 0x8(%r11), %r11
   addq %r11, %rbx
   movq %rbx, %rax
-  addq $0x70, %rsp
+  addq $0x50, %rsp
   popq %rbp
   retq
 _gvcontinue:
@@ -202,6 +202,6 @@ _gvcontinue:
   cmpq %rax, %rcx
   jl _gvloop
   movq $-0x1, %rax
-  addq $0x70, %rsp
+  addq $0x50, %rsp
   popq %rbp
   retq
