@@ -12,7 +12,7 @@ Commiting to the project:
 
 Contributors sign the WAIVER to dedicate their copyright interest to the public domain.
 
-git commit -S -a -m "Commit Message" -m "$(gpg --no-version --armor -o - --sign WAIVER)"
+git commit -S -a -m "Commit Message" -m "$(gpg -a -b -o - -s WAIVER)"
 
 Opening a pull request:
 
