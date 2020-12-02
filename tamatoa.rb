@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 assembly = ""
 ASSEMBLY_HEADER=<<EOF
 .section __TEXT,__text

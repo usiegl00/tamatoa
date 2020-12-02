@@ -13,8 +13,6 @@ shellcheck: shellcheck.c
 #.SILENT: macho
 macho:
 	printf "#include <stdio.h>\nint main() {printf(\"Hello, %%s.\\\\n\", \"tamatoa\");}" | clang -O3 -x c -o $@ -
-#printf "\033[0;31m[-]\033[0m Error: file not found: $@\n"
-#false
 
 tamatoa: tamatoa.s macho
 ifeq ($(shell gem info ruby-macho -i), false)
@@ -27,7 +25,7 @@ else
 endif
 
 tamatoa.bin: tamatoa shellcheck
-	./$<.rb $< macho > macho.s
+	ruby $<.rb $< macho > macho.s
 	as macho.s -o $<.o
 	otool -xX $<.o | cut -f 2 | xxd -r -p > $@
 	@printf "\033[0;32m[+]\033[0m Checking the shellcode...\n"
