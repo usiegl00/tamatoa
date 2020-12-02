@@ -3,7 +3,7 @@
 _main:
   pushq %rbp
   movq %rsp, %rbp
-  subq $0xB0, %rsp
+  subq $0x70, %rsp
   movq %r10, 0x10(%rsp)
   movq %r12, 0x18(%rsp)
   xorq %rcx, %rcx
@@ -56,7 +56,7 @@ _main:
 	jmp _exit
 
 _exit:
-  addq $0xB0, %rsp
+  addq $0x70, %rsp
   popq %rbp
 
   retq
@@ -107,7 +107,7 @@ _fdexit:
 _resolvesymbol:
   pushq %rbp
   movq %rsp, %rbp
-  subq $0xB0, %rsp
+  subq $0x70, %rsp
   movq %rdi, 0x28(%rsp)
   movq %rdx, 0x30(%rsp)
   movq %rsi, 0x38(%rsp)
@@ -145,7 +145,7 @@ _rscont1:
   cmpq $0x0, %r12
   jne _getvaddr
   movq $-0x1, %rax
-  addq $0xB0, %rsp
+  addq $0x70, %rsp
   popq %rbp
   retq
 
@@ -196,7 +196,7 @@ _gvloop:
   movq 0x8(%r11), %r11
   addq %r11, %rbx
   movq %rbx, %rax
-  addq $0xB0, %rsp
+  addq $0x70, %rsp
   popq %rbp
   retq
 _gvcontinue:
@@ -204,6 +204,6 @@ _gvcontinue:
   cmpq %rax, %rcx
   jl _gvloop
   movq $-0x1, %rax
-  addq $0xB0, %rsp
+  addq $0x70, %rsp
   popq %rbp
   retq
