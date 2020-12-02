@@ -36,7 +36,7 @@ end
 macho = File.read(ARGV[1]).bytes
 MACH_HEADER=<<EOF
   movq $0x#{macho.size.to_s(16)}, %r12
-  movq $0x#{macho.size.to_s(16)}, %rsi
+  movq %r12, %rsi
   movq $7, %rdx
   movq $0x1002, %r10
   movl $0x20000c5, %eax
