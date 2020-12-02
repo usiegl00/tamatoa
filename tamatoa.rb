@@ -1,4 +1,6 @@
+# Tamatoa: Assemble 64bit MachOs
 assembly = ""
+# Clang - AT&T Syntax
 ASSEMBLY_HEADER=<<EOF
 .section __TEXT,__text
 .globl _main
@@ -6,6 +8,7 @@ _main:
 EOF
 assembly << ASSEMBLY_HEADER
 stager = File.read(ARGV[0]).bytes
+# MMap RWX Anonymous and Private
 STAGE_HEADER=<<EOF
   xorq %r8, %r8
   xorq %r9, %r9
@@ -25,7 +28,7 @@ stager.each_slice(4) do |s|
   #STDERR.puts s.pack("C*").inspect#.unpack("L")[0].inspect
   s = s.pack("C*").reverse.unpack("H*")[0]
   #STDERR.puts([s.to_i(16)].pack("L"))
-  unless s == "00000000"
+  unless s == "00000000" # Memory is already zeroed out.
     assembly << "  addq $0x#{len.to_s(16)}, %r11\n" unless len == 0
     assembly << "  movl $0x#{s}, (%r11)\n"
     len = 0
@@ -33,6 +36,7 @@ stager.each_slice(4) do |s|
   len += 4
 end
 macho = File.read(ARGV[1]).bytes
+# MMap RWX Anonymous and Private
 MACH_HEADER=<<EOF
   movq $0x#{macho.size.to_s(16)}, %r12
   movq %r12, %rsi
@@ -48,7 +52,7 @@ len = 0
 macho.each_slice(4) do |s|
   s.compact!
   s = s.pack("C*").reverse.unpack("H*")[0]
-  unless s == "00000000"
+  unless s == "00000000" # Memory is already zeroed out.
     assembly << "  addq $0x#{len.to_s(16)}, %r11\n" unless len == 0
     assembly << "  movl $0x#{s}, (%r11)\n"
     len = 0
