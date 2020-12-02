@@ -38,7 +38,7 @@ _main:
   jz _exit
 
   movq 0x38(%rsp), %rdi
-  movq $0x646f6d, 0x40(%rsp)
+  movw $0x6d, 0x40(%rsp)
   leaq 0x40(%rsp), %rsi
   movl $0x3, %edx
   movq 0x30(%rsp), %rax
