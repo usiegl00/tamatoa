@@ -4,7 +4,7 @@ _main:
   pushq %rbp
   movq %rsp, %rbp
   subq $0x70, %rsp
-  movq %r10, 0x10(%rsp)
+  movq %r15, 0x10(%rsp)
   movq %r12, 0x18(%rsp)
   xorq %rcx, %rcx
   movq $0x1000, %rdx

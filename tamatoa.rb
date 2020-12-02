@@ -58,7 +58,6 @@ end
 ASSEMBLY_FOOTER=<<EOF
   movq $15527, %r11
   addq %r14, %r11
-  movq %r15, %r10
 
   pushq %r14
 
