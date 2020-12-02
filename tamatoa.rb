@@ -75,8 +75,8 @@ ASSEMBLY_FOOTER=<<EOF
   movl $0x2000049, %eax
   syscall
 
-  movl $0x2000001, %eax
   movq $0x0, %rdi
+  movl $0x2000001, %eax
   syscall
 EOF
 assembly << ASSEMBLY_FOOTER

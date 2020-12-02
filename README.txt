@@ -20,5 +20,5 @@
     +-------------------------\_/------------------------+      
     |                  Requirement:  OS                 |      
     |         Dependency:  gem install ruby-macho        |      
-    |         $(: Copy MachO to "macho" ) && make        |      
+    |           : Copy MachO to "macho" && make          |      
     +----------------------------------------------------+      
