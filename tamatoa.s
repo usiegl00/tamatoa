@@ -53,7 +53,6 @@ _main:
   movq $0xMACHOENTRY, %rdx
   addq %rdx, %rsi
   callq *%rsi
-	jmp _exit
 
 _exit:
   addq $0x70, %rsp
