@@ -50,8 +50,7 @@ _main:
   callq _finddyld
   cmpq $0x0, %rsi
   je _exit
-  movq $0xMACHOENTRY, %rdx
-  addq %rdx, %rsi
+  addq $0xMACHOENTRY, %rsi
   callq *%rsi
 
 _exit:
