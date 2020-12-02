@@ -21,6 +21,7 @@ STAGE_HEADER=<<EOF
   movq %r14, %r11
 EOF
 assembly << STAGE_HEADER
+# movl stager into memory
 len = 0
 stager.each_slice(4) do |s|
   s.compact!
@@ -48,6 +49,7 @@ MACH_HEADER=<<EOF
   movq %r15, %r11
 EOF
 assembly << MACH_HEADER
+# movl macho into memory
 len = 0
 macho.each_slice(4) do |s|
   s.compact!
@@ -59,6 +61,12 @@ macho.each_slice(4) do |s|
   end
   len += 4
 end
+# Push r14 onto stack (Gets clobbered by stager)
+# Call stager entrypoint
+# Restore r14 from top of stack
+# MUnmap stager
+# MUnmap macho
+# exit 0
 ASSEMBLY_FOOTER=<<EOF
   movq $15553, %r11
   addq %r14, %r11
