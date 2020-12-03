@@ -9,7 +9,9 @@ _main:
 EOF
 assembly << ASSEMBLY_HEADER
 stager = File.read(ARGV[0]).bytes
+# Clear Registers
 # MMap RWX Anonymous and Private
+# Store Return Address in r14
 STAGE_HEADER=<<EOF
   xorq %r8, %r8
   xorq %r9, %r9
@@ -23,6 +25,7 @@ STAGE_HEADER=<<EOF
 EOF
 assembly << STAGE_HEADER
 # movl stager into memory
+# by incementing r11
 len = 0
 stager.each_slice(4) do |s|
   s.compact!
