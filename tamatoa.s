@@ -113,7 +113,7 @@ _resolvesymbol:
   movq %rbx, %r8
   addq $0x20, %r8
   movl 0x10(%rbx), %ecx
-  subl $1, %ecx
+  decl %ecx
 _rsloop:
   movl (%r8), %edx
   cmpl $0x2, %edx
@@ -172,13 +172,12 @@ _getvaddr:
   movq (%rsp), %rdx
   xorq %rax, %rax
   movl 0xC(%rdx), %eax
-  subq $1, %rax
-  xor %r8, %r8
+  decq %rax
   movq 0x30(%rsp), %rbx
-  movl 0x8(%rdx), %r8d
-  addq %r12, %r8
+  movq %r12, %r8
+  addl 0x8(%rdx), %r8d
   addq %rbx, %r8
-  movq $0, %rcx
+  xorq %rcx, %rcx
 _gvloop:
   movq 0x40(%rsp), %rdi
   movl (%r8, %rcx, 8), %r11d
