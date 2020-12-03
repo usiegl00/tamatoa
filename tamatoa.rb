@@ -86,7 +86,7 @@ ASSEMBLY_FOOTER=<<EOF
   movl $0x2000049, %eax
   syscall
 
-  movq $0x0, %rdi
+  xorq %rdi, %rdi
   movl $0x2000001, %eax
   syscall
 EOF
