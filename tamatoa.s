@@ -8,14 +8,12 @@ _main:
   movq %r12, 0x18(%rsp)
   xorq %rcx, %rcx
   movq $0x1000, %rdx
-  xorq %rsi, %rsi
   movq $0x100000000, %rdi
   callq _finddyld
   xorq %rcx, %rcx
   movq $0x1000, %rdx
   addq $0x1000, %rsi
   movq %rsi, %rdi
-  xorq %rsi, %rsi
   callq _finddyld
   movq %rsi, 0x20(%rsp)
   movq 0x20(%rsp), %rdx
