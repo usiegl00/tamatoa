@@ -76,15 +76,13 @@ ASSEMBLY_FOOTER=<<EOF
 
   callq *%r11
 
-  popq %r14
-
-  movq %r15, %rdi
-  movq $0x#{stager.size.to_s(16)}, %rsi
+  popq %rdi
+  movq $0x#{macho.size.to_s(16)}, %rsi
   movl $0x2000049, %eax
   syscall
 
-  movq %r14, %rdi
-  movq $0x#{macho.size.to_s(16)}, %rsi
+  movq %r15, %rdi
+  movq $0x#{stager.size.to_s(16)}, %rsi
   movl $0x2000049, %eax
   syscall
 
