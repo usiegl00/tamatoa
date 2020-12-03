@@ -1,4 +1,5 @@
 # Tamatoa: Assemble 64bit MachOs
+require "macho"
 assembly = ""
 # Clang - AT&T Syntax
 ASSEMBLY_HEADER=<<EOF
@@ -68,7 +69,7 @@ end
 # MUnmap macho
 # exit 0
 ASSEMBLY_FOOTER=<<EOF
-  movq $15556, %r11
+  movq $0x#{MachO::MachOFile.new(ARGV[0]).load_commands.select {|l| l.class == MachO::LoadCommands::EntryPointCommand }[0].entryoff.to_s(16)}, %r11
   addq %r14, %r11
 
   pushq %r14
