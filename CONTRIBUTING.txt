@@ -8,6 +8,8 @@ help you as best as possible.
 
 If you found a bug, please label the issue with "bug" so that we can assess its priority.
 
+If you have a question, please label the issue with "question" so that we can decide it.
+
 Commiting to the project:
 
 Contributors sign the WAIVER to dedicate their copyright interest to the public domain.
