@@ -11,17 +11,22 @@ _main:
   movq $0x1000, %rdx
   movq $0x100000000, %rdi
   callq _finddyld
+_dyld:
   xorq %rcx, %rcx
   movq $0x1000, %rdx
   addq $0x1000, %rsi
   movq %rsi, %rdi
   callq _finddyld
   movq %rsi, 0x20(%rsp)
+_nscreate:
   movq 0x20(%rsp), %rdx
   movq $0x19, %rsi
   movq $0x4d6d6f72, %rdi
   callq _resolvesymbol
   movq %rax, 0x28(%rsp)
+  cmpq $-0x1, %rax
+  je _fdyld
+_nsmodule:
   movq 0x20(%rsp), %rdx
   movq $0x4, %rsi
   movq $0x4d6b6e69, %rdi
@@ -57,6 +62,10 @@ _exit:
   popq %rbp
 
   retq
+
+_fdyld:
+  movq 0x20(%rsp), %rsi
+  jmp _dyld
 
 # Locates the dlyd in memory.
 # Machine code will keep going if it reaches the end

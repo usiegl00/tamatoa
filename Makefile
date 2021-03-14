@@ -28,6 +28,6 @@ endif
 tamatoa.bin: tamatoa shellcheck
 	ruby $<.rb $< macho > macho.s
 	as macho.s -o $<.o
-	otool -xX $<.o | cut -f 2 | xxd -r -p > $@
+	otool -xX $<.o | cut -d " " -f 2- | xxd -r -p > $@
 	@printf "\033[0;32m[+]\033[0m Checking the shellcode...\n"
 	./shellcheck $@
