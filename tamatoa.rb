@@ -3,7 +3,7 @@ require "macho"
 assembly = ""
 # Clang - AT&T Syntax
 ASSEMBLY_HEADER=<<EOF
-.section __TEXT,__text
+.text
 .globl _main
 _main:
 EOF
@@ -127,7 +127,7 @@ EOF
 assembly << ASSEMBLY_STAGER_HEADER
 # Handle arguments
 rpop = 0
-arguments = ARGV[1..].empty? ? ["./."] : ARGV[1..]
+arguments = ARGV[1..-1].empty? ? ["./."] : ARGV[1..-1]
 (arguments.count+1).times do
   assembly << "  pushq $0\n"
   rpop += 1

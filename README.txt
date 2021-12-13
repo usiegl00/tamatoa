@@ -18,8 +18,7 @@
                             \\   //                             
                              \\_//                              
     +-------------------------\_/------------------------+      
-    |                  Requirement:  OS                 |      
     |         Dependency:  gem install ruby-macho        |      
     |           : Copy MachO to "macho" && make          |      
-    |          : Args && make all -- ./macho arg         |      
+    |        : Args && make all -- "\./macho" args       |      
     +----------------------------------------------------+      
