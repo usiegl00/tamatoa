@@ -61,6 +61,9 @@ ASSEMBLY_FOOTER=<<EOF
   syscall
 
   xorq %rdi, %rdi
+  callq _fflush
+
+  xorq %rdi, %rdi
   movl $0x2000001, %eax
   syscall
 EOF
@@ -299,6 +302,111 @@ _gvcontinue:
   jl _gvloop
   movq $-0x1, %rax
   addq $0x50, %rsp
+  popq %rbp
+  retq
+
+__fwalk:
+  pushq %rbp
+  movq %rsp, %rbp
+  pushq %r15
+  pushq %r14
+  pushq %r13
+  pushq %r12
+  pushq %rbx
+  pushq %rax
+  movq %rdi, %r14
+  movq 367(%rip), %r12
+  xorl %r15d, %r15d
+  testq %r12, %r12
+  je __fwalk+0x53
+  movq 16(%r12), %rbx
+  movl 8(%r12), %r13d
+  testl %r13d, %r13d
+  jle __fwalk+0x4d
+  cmpw $0, 16(%rbx)
+  je __fwalk+0x41
+  movq %rbx, %rdi
+  xorl %eax, %eax
+  callq *%r14
+  orl %eax, %r15d
+  decl %r13d
+  addq $152, %rbx
+  jmp __fwalk+0x2a
+  movq (%r12), %r12
+  jmp __fwalk+0x1b
+  movl %r15d, %eax
+  addq $8, %rsp
+  popq %rbx
+  popq %r12
+  popq %r13
+  popq %r14
+  popq %r15
+  popq %rbp
+  retq
+
+___sflush:
+  pushq %rbp
+  movq %rsp, %rbp
+  pushq %r15
+  pushq %r14
+  pushq %rbx
+  pushq %rax
+  movswl 16(%rdi), %ecx
+  xorl %eax, %eax
+  testb $8, %cl
+  je ___sflush+0x63
+  movq %rdi, %r14
+  movq 24(%rdi), %r15
+  testq %r15, %r15
+  je ___sflush+0x63
+  movl (%r14), %ebx
+  movq %r15, (%r14)
+  xorl %eax, %eax
+  testb $3, %cl
+  jne ___sflush+0x32
+  movl 32(%r14), %eax
+  subl %r15d, %ebx
+  movl %eax, 12(%r14)
+  testl %ebx, %ebx
+  jle ___sflush+0x57
+  movq 48(%r14), %rdi
+  movq %r15, %rsi
+  movl %ebx, %edx
+  callq *80(%r14)
+  testl %eax, %eax
+  jle ___sflush+0x5b
+  subl %eax, %ebx
+  movl %eax, %eax
+  addq %rax, %r15
+  jmp ___sflush+0x39
+  xorl %eax, %eax
+  jmp ___sflush+0x63
+  orb $64, 16(%r14)
+  pushq $-1
+  popq %rax
+  addq $8, %rsp
+  popq %rbx
+  popq %r14
+  popq %r15
+  popq %rbp
+  retq
+
+_fflush:
+  pushq %rbp
+  movq %rsp, %rbp
+  testq %rdi, %rdi
+  je _fflush+0x15
+  testb $24, 16(%rdi)
+  je _fflush+0x22
+  popq %rbp
+  jmp ___sflush
+  leaq -138(%rip), %rdi
+  popq %rbp
+  jmp __fwalk
+  callq 19 #dyld_stub_binder+0x100003f86
+  movl $9, (%rax)
+  pushq $-1
+  popq %rax
   popq %rbp
   retq
 EOF
