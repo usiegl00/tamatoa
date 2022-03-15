@@ -14,7 +14,7 @@ assembly << ASSEMBLY_HEADER
 STAGE_HEADER=<<EOF
   xorq %r8, %r8
   xorq %r9, %r9
-  xorq %rdi, %rdi
+  #xorq %rdi, %rdi
 EOF
 assembly << STAGE_HEADER
 macho = File.read(ARGV[0]).bytes
@@ -24,8 +24,8 @@ MACH_HEADER=<<EOF
   movq $0x7f0000000000, %rdi
   movq $0x#{macho.size.to_s(16)}, %r12
   movq %r12, %rsi
-  movq $7, %rdx
-  movq $0x1002, %r10
+  movl $7, %edx
+  movl $0x1002, %r10d
   movl $0x20000c5, %eax
   syscall
   movq %rax, %r15
@@ -44,14 +44,15 @@ macho.each_slice(4) do |s|
   end
   len += 4
 end
-# Push r14 onto stack (Gets clobbered by stager)
+# Push r15 onto stack (Gets clobbered by stager)
 # Call stager entrypoint
-# Restore r14 from top of stack
+# Restore r15 from top of stack
 # MUnmap macho
 # exit 0
 ASSEMBLY_FOOTER=<<EOF
   pushq %r15
 
+  movq $0x#{(MachO::MachOFile.new(ARGV[0]).load_commands.select {|l|l.class == MachO::LoadCommands::EntryPointCommand}[0].entryoff.to_s(16))}, %r14
   callq _stage
 
   popq %r15
@@ -59,21 +60,64 @@ ASSEMBLY_FOOTER=<<EOF
   movq $0x#{macho.size.to_s(16)}, %rsi
   movl $0x2000049, %eax
   syscall
+EOF
+assembly << ASSEMBLY_FOOTER
+# Load fflush
+if ARGV[0] != ARGV[1]
+fflush = File.read(ARGV[1]).bytes
+MACH_HEADER_FFLUSH=<<EOF
+  xorq %r8, %r8
+  xorq %r9, %r9
+  movq $0x7f0000000000, %rdi
+  movq $0x#{fflush.size.to_s(16)}, %r12
+  movq %r12, %rsi
+  movl $7, %edx
+  movl $0x1002, %r10d
+  movl $0x20000c5, %eax
+  syscall
+  movq %rax, %r15
+  movq %r15, %r11
+EOF
+assembly << MACH_HEADER_FFLUSH
+# movl fflush into memory
+len = 0
+fflush.each_slice(4) do |s|
+  s.compact!
+  s = s.pack("C*").reverse.unpack("H*")[0]
+  unless s == "00000000" # Memory is already zeroed out.
+    assembly << "  addq $0x#{len.to_s(16)}, %r11\n" unless len == 0
+    assembly << "  movl $0x#{s}, (%r11)\n"
+    len = 0
+  end
+  len += 4
+end
+ASSEMBLY_FOOTER_FFLUSH=<<EOF
+  pushq %r15
 
-  xorq %rdi, %rdi
-  callq _fflush
+  movq $0x#{(MachO::MachOFile.new(ARGV[1]).load_commands.select {|l|l.class == MachO::LoadCommands::EntryPointCommand}[0].entryoff.to_s(16))}, %r14
+  callq _stage
 
+  popq %r15
+  movq %r15, %rdi
+  movq $0x#{fflush.size.to_s(16)}, %rsi
+  movl $0x2000049, %eax
+  syscall
+EOF
+assembly << ASSEMBLY_FOOTER_FFLUSH
+end
+ASSEMBLY_EXIT=<<EOF
   xorq %rdi, %rdi
   movl $0x2000001, %eax
   syscall
 EOF
-assembly << ASSEMBLY_FOOTER
+assembly << ASSEMBLY_EXIT
 # Stager
 ASSEMBLY_STAGER_HEADER=<<EOF
 _stage:
   pushq %rbp
   movq %rsp, %rbp
   subq $0x50, %rsp
+  movq %r14, 0x8(%rsp)
   movq %r15, 0x10(%rsp)
   movq %r12, 0x18(%rsp)
   xorq %rcx, %rcx
@@ -124,13 +168,13 @@ _nsmodule:
   cmpq $0x0, %rsi
   je _exit
 
-  addq $0x#{(MachO::MachOFile.new(ARGV[0]).load_commands.select {|l|l.class == MachO::LoadCommands::EntryPointCommand}[0].entryoff.to_s(16))}, %rsi
+  addq 0x8(%rsp), %rsi
   movq %rsi, %r10
 EOF
 assembly << ASSEMBLY_STAGER_HEADER
 # Handle arguments
 rpop = 0
-arguments = ARGV[1..-1].empty? ? ["./."] : ARGV[1..-1]
+arguments = ARGV[2..-1].empty? ? ["./."] : ARGV[2..-1]
 (arguments.count+1).times do
   assembly << "  pushq $0\n"
   rpop += 1
@@ -302,111 +346,6 @@ _gvcontinue:
   jl _gvloop
   movq $-0x1, %rax
   addq $0x50, %rsp
-  popq %rbp
-  retq
-
-__fwalk:
-  pushq %rbp
-  movq %rsp, %rbp
-  pushq %r15
-  pushq %r14
-  pushq %r13
-  pushq %r12
-  pushq %rbx
-  pushq %rax
-  movq %rdi, %r14
-  movq 367(%rip), %r12
-  xorl %r15d, %r15d
-  testq %r12, %r12
-  je __fwalk+0x53
-  movq 16(%r12), %rbx
-  movl 8(%r12), %r13d
-  testl %r13d, %r13d
-  jle __fwalk+0x4d
-  cmpw $0, 16(%rbx)
-  je __fwalk+0x41
-  movq %rbx, %rdi
-  xorl %eax, %eax
-  callq *%r14
-  orl %eax, %r15d
-  decl %r13d
-  addq $152, %rbx
-  jmp __fwalk+0x2a
-  movq (%r12), %r12
-  jmp __fwalk+0x1b
-  movl %r15d, %eax
-  addq $8, %rsp
-  popq %rbx
-  popq %r12
-  popq %r13
-  popq %r14
-  popq %r15
-  popq %rbp
-  retq
-
-___sflush:
-  pushq %rbp
-  movq %rsp, %rbp
-  pushq %r15
-  pushq %r14
-  pushq %rbx
-  pushq %rax
-  movswl 16(%rdi), %ecx
-  xorl %eax, %eax
-  testb $8, %cl
-  je ___sflush+0x63
-  movq %rdi, %r14
-  movq 24(%rdi), %r15
-  testq %r15, %r15
-  je ___sflush+0x63
-  movl (%r14), %ebx
-  movq %r15, (%r14)
-  xorl %eax, %eax
-  testb $3, %cl
-  jne ___sflush+0x32
-  movl 32(%r14), %eax
-  subl %r15d, %ebx
-  movl %eax, 12(%r14)
-  testl %ebx, %ebx
-  jle ___sflush+0x57
-  movq 48(%r14), %rdi
-  movq %r15, %rsi
-  movl %ebx, %edx
-  callq *80(%r14)
-  testl %eax, %eax
-  jle ___sflush+0x5b
-  subl %eax, %ebx
-  movl %eax, %eax
-  addq %rax, %r15
-  jmp ___sflush+0x39
-  xorl %eax, %eax
-  jmp ___sflush+0x63
-  orb $64, 16(%r14)
-  pushq $-1
-  popq %rax
-  addq $8, %rsp
-  popq %rbx
-  popq %r14
-  popq %r15
-  popq %rbp
-  retq
-
-_fflush:
-  pushq %rbp
-  movq %rsp, %rbp
-  testq %rdi, %rdi
-  je _fflush+0x15
-  testb $24, 16(%rdi)
-  je _fflush+0x22
-  popq %rbp
-  jmp ___sflush
-  leaq -138(%rip), %rdi
-  popq %rbp
-  jmp __fwalk
-  callq 19 #dyld_stub_binder+0x100003f86
-  movl $9, (%rax)
-  pushq $-1
-  popq %rax
   popq %rbp
   retq
 EOF
