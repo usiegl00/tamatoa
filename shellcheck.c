@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+void breaker() {
+}
+
 int main(int argc, char ** argv) {
   FILE * fi = fopen(argv[1], "rb");
   struct stat fs;
@@ -25,6 +28,7 @@ int main(int argc, char ** argv) {
 
   unsigned long int (*m)() = (unsigned long int (*)())mcm;
 
+  breaker();
   m();
   
   return 0;

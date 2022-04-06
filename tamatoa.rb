@@ -8,6 +8,49 @@ ASSEMBLY_HEADER=<<EOF
 _main:
 EOF
 assembly << ASSEMBLY_HEADER
+# Load swift
+if ARGV[0] != ARGV[2]
+swift = File.read(ARGV[2]).bytes
+MACH_HEADER_SWIFT=<<EOF
+  xorq %r8, %r8
+  xorq %r9, %r9
+  xorq %rdi, %rdi
+  movq $0x#{swift.size.to_s(16)}, %r12
+  movq %r12, %rsi
+  movl $7, %edx
+  movl $0x1002, %r10d
+  movl $0x20000c5, %eax
+  syscall
+  movq %rax, %r15
+  movq %r15, %r11
+EOF
+assembly << MACH_HEADER_SWIFT
+# movl swift into memory
+len = 0
+swift.each_slice(4) do |s|
+  s.compact!
+  s = s.pack("C*").reverse.unpack("H*")[0]
+  unless s == "00000000" # Memory is already zeroed out.
+    assembly << "  addq $0x#{len.to_s(16)}, %r11\n" unless len == 0
+    assembly << "  movl $0x#{s}, (%r11)\n"
+    len = 0
+  end
+  len += 4
+end
+ASSEMBLY_FOOTER_SWIFT=<<EOF
+  pushq %r15
+
+  movq $0x#{(MachO::MachOFile.new(ARGV[2]).load_commands.select {|l|l.class == MachO::LoadCommands::EntryPointCommand}[0].entryoff.to_s(16))}, %r14
+  callq _stage
+
+  popq %r15
+  movq %r15, %rdi
+  movq $0x#{swift.size.to_s(16)}, %rsi
+  movl $0x2000049, %eax
+  syscall
+EOF
+assembly << ASSEMBLY_FOOTER_SWIFT
+end
 # Clear Registers
 # MMap RWX Anonymous and Private
 # Store Return Address in r14
@@ -21,7 +64,7 @@ macho = File.read(ARGV[0]).bytes
 # MMap RWX Anonymous and Private
 # TODO: 1407...???
 MACH_HEADER=<<EOF
-  movq $0x7f0000000000, %rdi
+  xorq %rdi, %rdi
   movq $0x#{macho.size.to_s(16)}, %r12
   movq %r12, %rsi
   movl $7, %edx
@@ -68,7 +111,7 @@ fflush = File.read(ARGV[1]).bytes
 MACH_HEADER_FFLUSH=<<EOF
   xorq %r8, %r8
   xorq %r9, %r9
-  movq $0x7f0000000000, %rdi
+  xorq %rdi, %rdi
   movq $0x#{fflush.size.to_s(16)}, %r12
   movq %r12, %rsi
   movl $7, %edx
@@ -121,6 +164,7 @@ _stage:
   movq %r15, 0x10(%rsp)
   movq %r12, 0x18(%rsp)
   xorq %rcx, %rcx
+  xorq %rsi, %rsi
   movq $0x1000, %rdx
   movq $0x100000000, %rdi
   callq _finddyld
@@ -174,7 +218,7 @@ EOF
 assembly << ASSEMBLY_STAGER_HEADER
 # Handle arguments
 rpop = 0
-arguments = ARGV[2..-1].empty? ? ["./."] : ARGV[2..-1]
+arguments = ARGV[3..-1].empty? ? ["./."] : ARGV[3..-1]
 (arguments.count+1).times do
   assembly << "  pushq $0\n"
   rpop += 1
@@ -292,10 +336,6 @@ _rscont1:
   retq
 
 _getvaddr:
-  xorq %r12, %r12
-  xorq %r13, %r13
-  xorq %r14, %r14
-  xorq %rdx, %rdx
   xorq %rdi, %rdi
   xorq %rbx, %rbx
   movq 0x10(%rsp), %r12
@@ -308,12 +348,11 @@ _getvaddr:
   subq %r14, %r12
   movq %r12, 0x20(%rsp)
   movq 0x30(%rsp), %rbx
-  add %r12, %rbx
+  addq %r12, %rbx
   movq (%rsp), %rdx
   movl 0x10(%rdx), %edi
   addq %rdi, %rbx
   movq %rbx, 0x40(%rsp)
-  movq (%rsp), %rdx
   xorq %rax, %rax
   movl 0xC(%rdx), %eax
   decq %rax
@@ -322,11 +361,20 @@ _getvaddr:
   addl 0x8(%rdx), %r8d
   addq %rbx, %r8
   xorq %rcx, %rcx
+  movq 0x40(%rsp), %rdi
+  movl (%r8, %rcx, 8), %r11d
+  addq %r11, %rdi
+#  callq _gvwrite
+  movq (%rdi), %r13
+  movq $8313473854205091679, %r14
+  cmpq %r14, %r13
+  jne _gvfail
+  jmp _gvcontinue
 _gvloop:
   movq 0x40(%rsp), %rdi
   movl (%r8, %rcx, 8), %r11d
   addq %r11, %rdi
-  xorq %r13, %r13
+#  callq _gvwrite
   movl 0x38(%rsp), %r13d
   movl 0x28(%rsp), %r14d
   addq %r13, %rdi
@@ -341,13 +389,34 @@ _gvloop:
   popq %rbp
   retq
 _gvcontinue:
-  inc %rcx
+  incq %rcx
   cmpq %rax, %rcx
   jl _gvloop
   movq $-0x1, %rax
   addq $0x50, %rsp
   popq %rbp
   retq
+_gvfail:
+  movq %rcx, %rax
+  incq %rax
+  jmp _gvcontinue
+#_gvwrite:
+#  pushq %rcx
+#  pushq %rdx
+#  pushq %rdi
+#  pushq %rsi
+#  pushq %rax
+#  movq %rdi, %rsi
+#  movq $30, %rdx
+#  movq $1, %rdi
+#  movl $0x2000004, %eax
+#  syscall
+#  popq %rax
+#  popq %rsi
+#  popq %rdi
+#  popq %rdx
+#  popq %rcx
+#  retq
 EOF
 assembly << ASSEMBLY_STAGER_FOOTER
 puts assembly
